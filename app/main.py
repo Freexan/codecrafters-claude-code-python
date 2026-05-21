@@ -40,7 +40,7 @@ def main():
                                 "description": "The path to the file to read and summarize."
                             }
                         },
-                        "required": ["text"]
+                        "required": ["text"],
                         "required": ["file_path"]
                     }
                 }
