@@ -33,15 +33,14 @@ def main():
                             "text": {
                                 "type": "string",
                                 "description": "The text to read and summarize."
-                            }
+                            },
                             "file_path":
                             {
                                 "type": "string",
                                 "description": "The path to the file to read and summarize."
                             }
                         },
-                        "required": ["text"],
-                        "required": ["file_path"]
+                        "required": ["text", "file_path"]
                     }
                 }
             }
