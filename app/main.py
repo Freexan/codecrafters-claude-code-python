@@ -23,7 +23,27 @@ def main():
         messages=[{"role": "user", "content": args.p}],
         tools= [
             {
-                "type": "read",
+                "type": "function",
+                "function": {
+                    "name": "Read",
+                    "description": "Read the given text and return the summary.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "description": "The text to read and summarize."
+                            }
+                            "file_path":
+                            {
+                                "type": "string",
+                                "description": "The path to the file to read and summarize."
+                            }
+                        },
+                        "required": ["text"]
+                        "required": ["file_path"]
+                    }
+                }
             }
         ]
     )
