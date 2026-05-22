@@ -34,16 +34,31 @@ def main():
                                 "type": "string",
                                 "description": "The text to read and summarize."
                             }
-                        "tool_calls": [
-                            {"type":
-                                 "function_call",
-                             "function":
-                                 {"name": "Read", "arguments": "{\"file_path\": \"/path/to/file.txt\"}"}
-                            }
-                        ]
                         },
                         "required": ["text"]
                     }
+                    "name": "Read"
+                    "toll_calls": [
+                        {
+                            "type": "function",
+                            "function": {
+                                "name": "Read",
+                                "parameters": {
+                                    "type": "object",
+                                    "properties": {
+                                        "text": {
+                                            "type": "function",
+                                            "function": {
+                                                "name": "Read",
+                                                "arguments": "{\"file_path\": \"/path/to/file.txt\"}"
+                                            }
+                                        }
+                                    },
+                                    "required": ["text"]
+                                }
+                            }
+                        }
+    ]
                 }
 
             }
