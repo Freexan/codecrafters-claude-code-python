@@ -33,16 +33,19 @@ def main():
                             "text": {
                                 "type": "string",
                                 "description": "The text to read and summarize."
-                            },
-                            "file_path":
-                            {
-                                "type": "string",
-                                "description": "The path to the file to read and summarize."
                             }
+                        "tool_calls": [
+                            {"type":
+                                 "function_call",
+                             "function":
+                                 {"name": "Read", "arguments": "{\"file_path\": \"/path/to/file.txt\"}"}
+                            }
+                        ]
                         },
-                        "required": ["text", "file_path"]
+                        "required": ["text"]
                     }
                 }
+
             }
         ]
     )
