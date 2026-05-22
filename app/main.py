@@ -1,11 +1,18 @@
 import argparse
 import os
 import sys
+import json
 
 from openai import OpenAI
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v1")
+
+
+def read_file_contents(file_path: str) -> str:
+    # Keep the tool simple: read file contents and return raw text.
+    with open(file_path, "r", encoding="utf-8") as handle:
+        return handle.read()
 
 
 def main():
@@ -21,59 +28,71 @@ def main():
     chat = client.chat.completions.create(
         model="anthropic/claude-haiku-4.5",
         messages=[{"role": "user", "content": args.p}],
-        tools= [
+        tools=[
             {
                 "type": "function",
                 "function": {
                     "name": "Read",
-                    "description": "Read the given text and return the summary.",
+                    "description": "Read a file from disk and return its contents.",
                     "parameters": {
                         "type": "object",
                         "properties": {
-                            "text": {
+                            "file_path": {
                                 "type": "string",
-                                "description": "The text to read and summarize."
+                                "description": "Absolute or relative path to the file to read.",
                             }
                         },
-                        "required": ["text"]
-                    }
-                    "name": "Read"
-                    "toll_calls": [
-                        {
-                            "type": "function",
-                            "function": {
-                                "name": "Read",
-                                "parameters": {
-                                    "type": "object",
-                                    "properties": {
-                                        "text": {
-                                            "type": "function",
-                                            "function": {
-                                                "name": "Read",
-                                                "arguments": "{\"file_path\": \"/path/to/file.txt\"}"
-                                            }
-                                        }
-                                    },
-                                    "required": ["text"]
-                                }
-                            }
-                        }
-    ]
-                }
-
+                        "required": ["file_path"],
+                    },
+                },
             }
-        ]
+        ],
     )
 
     if not chat.choices or len(chat.choices) == 0:
         raise RuntimeError("no choices in response")
+
+    message = chat.choices[0].message
+    if message.tool_calls:
+        tool_messages = []
+        for tool_call in message.tool_calls:
+            if tool_call.function.name != "Read":
+                raise RuntimeError(f"unknown tool: {tool_call.function.name}")
+
+            arguments = json.loads(tool_call.function.arguments or "{}")
+            file_path = arguments.get("file_path")
+            if not file_path:
+                raise RuntimeError("Read tool requires file_path")
+
+            file_contents = read_file_contents(file_path)
+            tool_messages.append(
+                {
+                    "role": "tool",
+                    "tool_call_id": tool_call.id,
+                    "content": file_contents,
+                }
+            )
+
+        chat = client.chat.completions.create(
+            model="anthropic/claude-haiku-4.5",
+            messages=[
+                {"role": "user", "content": args.p},
+                message,
+                *tool_messages,
+            ],
+        )
+
+        if not chat.choices or len(chat.choices) == 0:
+            raise RuntimeError("no choices after tool call")
+
+        message = chat.choices[0].message
 
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here!", file=sys.stderr)
 
     # TODO: Uncomment the following line to pass the first stage
 
-    print(chat.choices[0].message.content)
+    print(message.content)
 
 
 if __name__ == "__main__":
