@@ -10,7 +10,6 @@ BASE_URL = os.getenv("OPENROUTER_BASE_URL", default="https://openrouter.ai/api/v
 
 
 def read_file_contents(file_path: str) -> str:
-    # Keep the tool simple: read file contents and return raw text.
     with open(file_path, "r", encoding="utf-8") as handle:
         return handle.read()
 
