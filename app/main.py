@@ -27,6 +27,20 @@ def main():
     chat = client.chat.completions.create(
         model="anthropic/claude-haiku-4.5",
         messages=[{"role": "user", "content": args.p}],
+        while True,
+            response = client.chat.completions.create(..., messages=messages, ...)
+            message = response.choices[0].message
+            if message.tool_calls:
+                messages.append(message)
+                break
+            for tool_call in message.tool_calls:
+                messages.append(
+                    {
+                        "role": "tool",
+                        "tool_call_id": tool_call.id,
+                        "content": None,
+                    }
+                )
         tools=[
             {
                 "type": "function",
