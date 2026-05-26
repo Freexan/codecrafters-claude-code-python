@@ -84,7 +84,7 @@ def main():
             break
 
         for tool_call in message.tool_calls:
-            if tool_call.function.name != "Read", "Write":
+            if tool_call.function.name != "Read" and tool_call.function.name != "Write":
                 raise RuntimeError(f"unknown tool: {tool_call.function.name}")
 
             arguments = json.loads(tool_call.function.arguments or "{}")
