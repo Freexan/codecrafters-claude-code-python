@@ -42,6 +42,27 @@ def main():
                 },
             },
         }
+        {
+            "type": "function",
+            "function": {
+                "name": "Write",
+                "description": "Write contents to a file on disk.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Absolute or relative path to the file to write.",
+                        },
+                        "contents": {
+                            "type": "string",
+                            "description": "The contents to write to the file.",
+                        },
+                    },
+                    "required": ["file_path", "contents"],
+                },
+            },
+        }
     ]
 
     messages = [{"role": "user", "content": args.p}]
