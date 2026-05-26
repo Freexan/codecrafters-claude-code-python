@@ -14,6 +14,15 @@ def read_file_contents(file_path: str) -> str:
         return handle.read()
 
 
+def write_file_contents(file_path: str, contents: str) -> None:
+    directory = os.path.dirname(file_path)
+    if directory:
+        os.makedirs(directory, exist_ok=True)
+
+    with open(file_path, "w", encoding="utf-8") as handle:
+        handle.write(contents)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("-p", required=True)
@@ -84,20 +93,28 @@ def main():
             break
 
         for tool_call in message.tool_calls:
-            if tool_call.function.name != "Read" or tool_call.function.name != "Write":
+            if tool_call.function.name not in {"Read", "Write"}:
                 raise RuntimeError(f"unknown tool: {tool_call.function.name}")
 
             arguments = json.loads(tool_call.function.arguments or "{}")
             file_path = arguments.get("file_path")
             if not file_path:
-                raise RuntimeError("Read tool requires file_path")
+                raise RuntimeError(f"{tool_call.function.name} tool requires file_path")
 
-            file_contents = read_file_contents(file_path)
+            if tool_call.function.name == "Read":
+                tool_content = read_file_contents(file_path)
+            else:
+                contents = arguments.get("contents")
+                if contents is None:
+                    raise RuntimeError("Write tool requires contents")
+                write_file_contents(file_path, contents)
+                tool_content = ""
+
             messages.append(
                 {
                     "role": "tool",
                     "tool_call_id": tool_call.id,
-                    "content": file_contents,
+                    "content": tool_content,
                 }
             )
 
