@@ -86,6 +86,10 @@ def main():
                     "type": "object",
                     "required": ["command"],
                     "properties": {
+                        "file_path": {
+                            "type": "string",
+                            "description": "Absolute or relative path to the file to write.",
+                        }
                         "command": {
                             "type": "string",
                             "description": "The bash command to execute.",
@@ -125,9 +129,9 @@ def main():
 
             if tool_call.function.name == "Read":
                 tool_content = read_file_contents(file_path)
-            elif tool_call.function.name == "Bash":
+                elif tool_call.function.name == "Bash":
                 command = arguments.get("command")
-                if not command:
+                if command is None:
                     raise RuntimeError("Bash tool requires command")
                 tool_content = execute_bash_command(command)
             else:
