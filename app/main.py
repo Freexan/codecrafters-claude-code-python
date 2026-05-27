@@ -129,9 +129,9 @@ def main():
 
             if tool_call.function.name == "Read":
                 tool_content = read_file_contents(file_path)
-                elif tool_call.function.name == "Bash":
-                command = arguments.get("command")
-                if command is None:
+            elif tool_call.function.name == "Bash":
+                command = arguments.get("command, file_path")
+                if not command:
                     raise RuntimeError("Bash tool requires command")
                 tool_content = execute_bash_command(command)
             else:
