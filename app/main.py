@@ -89,8 +89,7 @@ def main():
                         "file_path": {
                             "type": "string",
                             "description": "Absolute or relative path to the file to write.",
-                        }
-                        "command": {
+                        }, "command": {
                             "type": "string",
                             "description": "The bash command to execute.",
                         },
@@ -159,3 +158,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
