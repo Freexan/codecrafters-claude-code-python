@@ -22,6 +22,11 @@ def write_file_contents(file_path: str, contents: str) -> None:
     with open(file_path, "w", encoding="utf-8") as handle:
         handle.write(contents)
 
+def execute_bash_command(command: str) -> str:
+    import subprocess
+
+    result = subprocess.run(command, shell=True, capture_output=True, text=True)
+    return result.stdout + result.stderr
 
 def main():
     p = argparse.ArgumentParser()
@@ -71,6 +76,23 @@ def main():
                     "required": ["file_path", "contents"],
                 },
             },
+        },
+        {
+            "type": "function",
+            "function": {
+                "name": "Bash",
+                "description": "Execute a bash command and return its output.",
+                "parameters": {
+                    "type": "object",
+                    "required": ["command"],
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "The bash command to execute.",
+                        },
+                    },
+                },
+            },
         }
     ]
 
@@ -93,7 +115,7 @@ def main():
             break
 
         for tool_call in message.tool_calls:
-            if tool_call.function.name not in {"Read", "Write"}:
+            if tool_call.function.name not in {"Read", "Write", "Bash"}:
                 raise RuntimeError(f"unknown tool: {tool_call.function.name}")
 
             arguments = json.loads(tool_call.function.arguments or "{}")
@@ -103,6 +125,11 @@ def main():
 
             if tool_call.function.name == "Read":
                 tool_content = read_file_contents(file_path)
+            elif tool_call.function.name == "Bash":
+                command = arguments.get("command")
+                if not command:
+                    raise RuntimeError("Bash tool requires command")
+                tool_content = execute_bash_command(command)
             else:
                 contents = arguments.get("contents")
                 if contents is None:
